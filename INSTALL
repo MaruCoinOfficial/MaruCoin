@@ -1,0 +1,9 @@
+Building marucoin
+
+See doc/readme-qt.rst for instructions on building marucoin-Qt,
+the intended-for-end-users, nice-graphical-interface, reference
+implementation of marucoin.
+
+See doc/build-*.txt for instructions on building marucoind,
+the intended-for-services, no-graphical-interface, reference
+implementation of marucoin.
