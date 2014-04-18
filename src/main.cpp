@@ -1094,7 +1094,7 @@ int64 static GetBlockValue(int nBits, int nHeight, int64 nFees)
     if(nHeight >= 2000) {
         if((nHeight >= 7000 && dDiff > 75) || nHeight >= 15000) { // GPU/ASIC difficulty calc
             // 2222222/(((x+2600)/9)^2)
-            nSubsidy = (4444444.0 / (pow((dDiff+2600.0)/9.0,2.0)));
+            nSubsidy = (44444444.0 / (pow((dDiff+2600.0)/9.0,2.0)));
             if (nSubsidy > 25) nSubsidy = 55;
             if (nSubsidy < 5) nSubsidy = 15;
         } else { // CPU mining calc
@@ -1903,15 +1903,14 @@ bool CBlock::ConnectBlock(CValidationState &state, CBlockIndex* pindex, CCoinsVi
     if (fBenchmark)
         printf("- Connect %u transactions: %.2fms (%.3fms/tx, %.3fms/txin)\n", (unsigned)vtx.size(), 0.001 * nTime, 0.001 * nTime / vtx.size(), nInputs <= 1 ? 0 : 0.001 * nTime / (nInputs-1));
 
-
-    if (vtx[0].GetValueOut() > GetBlockValue(pindex->nBits, pindex->pprev->nHeight, nFees))
+   if(pindex->pprev->nHeight != 1999)
+   if (vtx[0].GetValueOut() > GetBlockValue(pindex->pprev->nBits, pindex->pprev->nHeight, nFees))
         return state.DoS(100, error("ConnectBlock() : coinbase pays too much (actual=%"PRI64d" vs limit=%"PRI64d")", vtx[0].GetValueOut(), GetBlockValue(pindex->pprev->nBits, pindex->pprev->nHeight, nFees)));
 
 // For MaruCoin also add the protocol rule that the first output in the coinbase must go to the charity address and have at least 2.5% of the subsidy (as per integer arithmetic) (thx to einsteinium!)
 	if (vtx[0].vout[0].scriptPubKey != CHARITY_SCRIPT)
 		return state.DoS(100, error("ConnectBlock() : coinbase does not pay to the charity in the first output)"));
-	//int64 charityAmount = GetBlockValue(pindex->pprev->nBits, pindex->pprev->nHeight, 0) * 2.5 / 100;
-	int64 charityAmount = GetBlockValue(pindex->nBits, pindex->pprev->nHeight + 1, 0) * 2.5 / 100;
+	int64 charityAmount = GetBlockValue(pindex->pprev->nBits, pindex->pprev->nHeight, 0) * 2.5 / 100;
 	if (vtx[0].vout[0].nValue < charityAmount)
 		return state.DoS(100, error("ConnectBlock() : coinbase does not pay enough to the charity (actual=%"PRI64d" vs required=%"PRI64d")", vtx[0].vout[0].nValue, charityAmount));
 
@@ -4679,8 +4678,7 @@ CBlockTemplate* CreateNewBlock(const CScript& scriptPubKeyIn)
         nLastBlockSize = nBlockSize;
         printf("CreateNewBlock(): total size %"PRI64u"\n", nBlockSize);
 		// With MaruCoin, at least 2.5% of all of the block subsidy should go to the charity address. (thx to einsteinium)
-		//int64 reward = GetBlockValue(pindex->nBits,pindexPrev->nHeight+1, 0);
-		int64 reward = GetBlockValue(GetNextWorkRequired(pindexPrev, pblock),pindexPrev->nHeight+1, 0);
+		int64 reward = GetBlockValue(pindexPrev->nBits,pindexPrev->nHeight+1, 0);
 		int64 charityAmount = reward * 2.5 / 100;
         	pblock->vtx[0].vout[0].nValue = charityAmount;
 		pblock->vtx[0].vout[1].nValue = reward - charityAmount + nFees;
